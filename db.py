@@ -34,3 +34,27 @@ def get_user_purchases(user_id):
             WHERE user_id = ?
         """, (user_id,))
         return cursor.fetchall()
+
+def delete_purchase(user_id: int, purchase_id: int):
+    with sqlite3.connect("purchases.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            DELETE FROM saved_purchases
+            WHERE user_id = ? AND id = ?
+        """, (user_id, purchase_id))
+        conn.commit()
+
+def get_user_purchase_by_index(user_id, index):
+    with sqlite3.connect("purchases.db") as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT id, name, price, customer, date, deadline
+            FROM saved_purchases
+            WHERE user_id = ?
+            ORDER BY id
+        """, (user_id,))
+        rows = cursor.fetchall()
+        if 0 <= index < len(rows):
+            return rows[index], len(rows)
+        return None, len(rows)
+
