@@ -1,7 +1,7 @@
 import requests
 import os
 import pandas as pd
-from telegram import Update
+from telegram import Update, BotCommand
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 from dotenv import load_dotenv
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -11,12 +11,16 @@ from ML import filter_semantically
 
 init_db()
 load_dotenv()
+
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 ITEMS_PER_PAGE = 5
 
-CSV_URL_NEEDED = "https://zakupki.gov.ru/epz/order/orderCsvSettings/download.html?morphology=on&search-filter=%D0%94%D0%B0%D1%82%D0%B5+%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%89%D0%B5%D0%BD%D0%B8%D1%8F&pageNumber=1&sortDirection=false&recordsPerPage=_10&showLotsInfoHidden=false&savedSearchSettingsIdHidden=setting_order_kwysrk2v&sortBy=UPDATE_DATE&fz44=on&fz223=on&af=on&ca=on&pc=on&pa=on&currencyIdGeneral=-1&customerPlace=5277376%2C5277374&customerPlaceCodes=73000000000%2C63000000000&okpd2Ids=8874163%2C8874162%2C8874161&okpd2IdsCodes=63.9%2C63.1%2C62.0&OrderPlacementSmallBusinessSubject=on&OrderPlacementRnpData=on&OrderPlacementExecutionRequirement=on&orderPlacement94_0=0&orderPlacement94_1=0&orderPlacement94_2=0&from=1&to=500&placementCsv=true&registryNumberCsv=true&stepOrderPlacementCsv=true&methodOrderPurchaseCsv=true&nameOrderCsv=true&purchaseNumbersCsv=true&numberLotCsv=true&nameLotCsv=true&maxContractPriceCsv=true&currencyCodeCsv=true&maxPriceContractCurrencyCsv=true&currencyCodeContractCurrencyCsv=true&scopeOkdpCsv=true&scopeOkpdCsv=true&scopeOkpd2Csv=true&scopeKtruCsv=true&ea615ItemCsv=true&customerNameCsv=true&organizationOrderPlacementCsv=true&publishDateCsv=true&lastDateChangeCsv=true&startDateRequestCsv=true&endDateRequestCsv=true&ea615DateCsv=true&featureOrderPlacementCsv=true"
-CSV_URL = "https://zakupki.gov.ru/epz/order/orderCsvSettings/download.html?searchString=&morphology=on&search-filter=%D0%94%D0%B0%D1%82%D0%B5%20%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%89%D0%B5%D0%BD%D0%B8%D1%8F&pageNumber=1&sortDirection=false&recordsPerPage=_10&showLotsInfoHidden=false&savedSearchSettingsIdHidden=&sortBy=UPDATE_DATE&fz44=on&fz223=on&af=on&ca=on&pc=on&pa=on&placingWayList=&selectedLaws=&priceFromGeneral=&priceFromGWS=&priceFromUnitGWS=&priceToGeneral=&priceToGWS=&priceToUnitGWS=&currencyIdGeneral=-1&publishDateFrom=&publishDateTo=&applSubmissionCloseDateFrom=&applSubmissionCloseDateTo=&customerIdOrg=&customerFz94id=&customerTitle=&okpd2Ids=&okpd2IdsCodes=&from=1&to=500&placementCsv=true&registryNumberCsv=true&stepOrderPlacementCsv=true&methodOrderPurchaseCsv=true&nameOrderCsv=true&purchaseNumbersCsv=true&numberLotCsv=true&nameLotCsv=true&maxContractPriceCsv=true&currencyCodeCsv=true&maxPriceContractCurrencyCsv=true&currencyCodeContractCurrencyCsv=true&scopeOkdpCsv=true&scopeOkpdCsv=true&scopeOkpd2Csv=true&scopeKtruCsv=true&ea615ItemCsv=true&customerNameCsv=true&organizationOrderPlacementCsv=true&publishDateCsv=true&lastDateChangeCsv=true&startDateRequestCsv=true&endDateRequestCsv=true&ea615DateCsv=true&featureOrderPlacementCsv=true"
+CSV_URL = "https://zakupki.gov.ru/epz/order/orderCsvSettings/download.html?morphology=on&search-filter=%D0%94%D0%B0%D1%82%D0%B5+%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%89%D0%B5%D0%BD%D0%B8%D1%8F&pageNumber=1&sortDirection=false&recordsPerPage=_10&showLotsInfoHidden=false&savedSearchSettingsIdHidden=setting_order_kwysrk2v&sortBy=UPDATE_DATE&fz44=on&fz223=on&af=on&ca=on&pc=on&pa=on&currencyIdGeneral=-1&customerPlace=5277376%2C5277374&customerPlaceCodes=73000000000%2C63000000000&okpd2Ids=8874163%2C8874162%2C8874161&okpd2IdsCodes=63.9%2C63.1%2C62.0&OrderPlacementSmallBusinessSubject=on&OrderPlacementRnpData=on&OrderPlacementExecutionRequirement=on&orderPlacement94_0=0&orderPlacement94_1=0&orderPlacement94_2=0&from=1&to=500&placementCsv=true&registryNumberCsv=true&stepOrderPlacementCsv=true&methodOrderPurchaseCsv=true&nameOrderCsv=true&purchaseNumbersCsv=true&numberLotCsv=true&nameLotCsv=true&maxContractPriceCsv=true&currencyCodeCsv=true&maxPriceContractCurrencyCsv=true&currencyCodeContractCurrencyCsv=true&scopeOkdpCsv=true&scopeOkpdCsv=true&scopeOkpd2Csv=true&scopeKtruCsv=true&ea615ItemCsv=true&customerNameCsv=true&organizationOrderPlacementCsv=true&publishDateCsv=true&lastDateChangeCsv=true&startDateRequestCsv=true&endDateRequestCsv=true&ea615DateCsv=true&featureOrderPlacementCsv=true"
+# CSV_URL = "https://zakupki.gov.ru/epz/order/orderCsvSettings/download.html?searchString=&morphology=on&search-filter=%D0%94%D0%B0%D1%82%D0%B5%20%D1%80%D0%B0%D0%B7%D0%BC%D0%B5%D1%89%D0%B5%D0%BD%D0%B8%D1%8F&pageNumber=1&sortDirection=false&recordsPerPage=_10&showLotsInfoHidden=false&savedSearchSettingsIdHidden=&sortBy=UPDATE_DATE&fz44=on&fz223=on&af=on&ca=on&pc=on&pa=on&placingWayList=&selectedLaws=&priceFromGeneral=&priceFromGWS=&priceFromUnitGWS=&priceToGeneral=&priceToGWS=&priceToUnitGWS=&currencyIdGeneral=-1&publishDateFrom=&publishDateTo=&applSubmissionCloseDateFrom=&applSubmissionCloseDateTo=&customerIdOrg=&customerFz94id=&customerTitle=&okpd2Ids=&okpd2IdsCodes=&from=1&to=500&placementCsv=true&registryNumberCsv=true&stepOrderPlacementCsv=true&methodOrderPurchaseCsv=true&nameOrderCsv=true&purchaseNumbersCsv=true&numberLotCsv=true&nameLotCsv=true&maxContractPriceCsv=true&currencyCodeCsv=true&maxPriceContractCurrencyCsv=true&currencyCodeContractCurrencyCsv=true&scopeOkdpCsv=true&scopeOkpdCsv=true&scopeOkpd2Csv=true&scopeKtruCsv=true&ea615ItemCsv=true&customerNameCsv=true&organizationOrderPlacementCsv=true&publishDateCsv=true&lastDateChangeCsv=true&startDateRequestCsv=true&endDateRequestCsv=true&ea615DateCsv=true&featureOrderPlacementCsv=true"
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# Common block  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 def load_csv_rows():
     try:
@@ -25,13 +29,6 @@ def load_csv_rows():
     except Exception as e:
         print(f"[load_csv_rows] ❌ Ошибка чтения CSV: {e}")
         return pd.DataFrame()
-    
-# def get_csv_row(index: int):
-#     df = load_csv_rows()
-#     total = len(df)
-#     if 0 <= index < total:
-#         return df.iloc[index], total
-#     return None, total
 
 def getu_csv_row(index: int, df):
     total = len(df)
@@ -39,34 +36,38 @@ def getu_csv_row(index: int, df):
         return df.iloc[index], total
     return None, total
 
+def get_text(row):
+    title = row.get("Наименование закупки", "❓")
+    price = row.get("Начальная (максимальная) цена контракта", "❓")
+    customer = row.get("Наименование Заказчика", "❓")
+    date = row.get("Дата размещения", "❓")
+    deadline = row.get("Дата окончания подачи заявок")
+    if pd.isna(deadline) or not deadline:
+        deadline = "Не указано"
+
+    text = (
+        f"📌 *{title}*\n"
+        f"💰 {price} ₽\n"
+        f"🏢 {customer}\n"
+        f"📅 {date} → ⏳ {deadline}"
+    )
+    return text
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # ML block  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-df = load_csv_rows()
-
-filtered_df = filter_semantically(df)
-
-# def get_filtered_csv_row(index: int):
-#     total = len(filtered_df)
-#     if 0 <= index < total:
-#         return filtered_df.iloc[index], total
-#     return None, total
+filtered_df = filter_semantically(df = load_csv_rows())
 
 async def send_filtered_csv_row(update, context, index: int = 0, is_edit=False):
+    
     if filtered_df.empty:
         await update.message.reply_text("😔 Ничего не найдено по смыслу запроса.")
         return
 
     row = filtered_df.iloc[index]
     
-    message = (
-        f"📌 *{row['Наименование закупки']}*\n"
-        f"💰 {row['Начальная (максимальная) цена контракта']} ₽\n"
-        f"🏢 {row['Наименование Заказчика']}\n"
-        f"📅 {row['Дата размещения']}"
-    )
+    message = get_text(row)
 
     buttons = []
     if index > 0:
@@ -122,7 +123,7 @@ async def send_user_purchase(update, context, user_id: int, index: int, is_edit=
     row, total = get_user_purchase_by_index(user_id, index)
 
     if row is None:
-        msg = "📭 У тебя нет сохранённых закупок." if index == 0 else "❌ Запись не найдена."
+        msg = "📭 У Вас нет сохранённых закупок." if index == 0 else "❌ Запись не найдена."
         if is_edit:
             await update.callback_query.edit_message_text(msg)
         else:
@@ -198,7 +199,7 @@ async def handle_csv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     elif data.startswith("save_"):
         index = int(data.split("_")[1])
-        row, total = getu_csv_row(index, df) # --- df undefined
+        row, total = getu_csv_row(index, df = load_csv_rows()) 
 
         if row is not None:
             user_id = query.from_user.id
@@ -216,7 +217,7 @@ async def handle_csv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     elif data.startswith("fsave_"):
         index = int(data.split("_")[1])
-        row, total = getu_csv_row(index, df) # --- df undefined
+        row, total = getu_csv_row(index, filtered_df)
 
         if row is not None:
             user_id = query.from_user.id
@@ -251,24 +252,6 @@ async def handle_csv_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
 
         save_purchase(user_id, name, price, customer, date, deadline)
         await query.answer("✅ Сохранено!")
-
-async def handle_menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query
-    await query.answer()
-
-    data = query.data
-
-    if data == "show_csv":
-        await send_csv_row(update, context, index=0, is_edit=False)
-    
-    elif data == "show_f_csv":
-        await send_filtered_csv_row(update, context, index=0, is_edit=False)
-    
-    elif data == "get_csv":
-        await get_csv(update, context)
-
-    elif data == "show_saved":
-        await show_saved(update, context)
 
 async def handle_scheduled_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -305,14 +288,12 @@ scheduled_df_by_user = {}
 async def schedule(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     chat_id = update.effective_chat.id
-
-    # df = load_csv_rows()
-
+    
+    df = load_csv_rows()
     if df.empty:
         await update.message.reply_text("⚠️ CSV не загружен.")
         return
     
-    # scheduled_df_by_user[user_id] = pd.DataFrame()
     clear_scheduled_purchases(user_id)
 
     new_df = get_new_records_from_db(df, user_id)
@@ -334,15 +315,16 @@ async def schedule(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     context.job_queue.run_repeating(
         send_updates_job,
-        interval=120,
+        interval=7200,
         first=0,
         chat_id=chat_id,
         name=str(chat_id)
     )
-    await update.message.reply_text("📬 Вы подписаны на автообновление каждый час.")
+
+    await update.message.reply_text("📬 Вы подписаны на автообновление каждые 2 часа.")
 
 async def send_scheduled_csv_row(update, context, user_id: int, index: int, is_edit=False):
-    df = scheduled_df_by_user.get(user_id)
+    df = scheduled_df_by_user.get(user_id) 
 
     if df is None or df.empty or index >= len(df):
         message = "❌ Нечего показывать."
@@ -358,20 +340,7 @@ async def send_scheduled_csv_row(update, context, user_id: int, index: int, is_e
 
     row = df.iloc[index]
 
-    title = row.get("Наименование закупки", "❓")
-    price = row.get("Начальная (максимальная) цена контракта", "❓")
-    customer = row.get("Наименование Заказчика", "❓")
-    date = row.get("Дата размещения", "❓")
-    deadline = row.get("Дата окончания подачи заявок")
-    if pd.isna(deadline) or not deadline:
-        deadline = "Не указано"
-
-    text = (
-        f"📌 *{title}*\n"
-        f"💰 {price} ₽\n"
-        f"🏢 {customer}\n"
-        f"📅 {date} → ⏳ {deadline}"
-    )
+    text = get_text(row)
 
     buttons = []
     if index > 0:
@@ -403,14 +372,14 @@ async def send_scheduled_csv_row(update, context, user_id: int, index: int, is_e
             text.strip(),
             parse_mode="Markdown",
             reply_markup=reply_markup
-        )
+        ) 
 
 async def send_updates_job(context):
     chat_id = context.job.chat_id
     user_id = chat_id
 
-    # df = load_csv_rows()
-    new_df = get_new_records_from_db(df, user_id)  # ← тут уже не чистим
+    df = load_csv_rows()
+    new_df = get_new_records_from_db(df, user_id)
 
     if new_df.empty:
         await context.bot.send_message(chat_id=chat_id, text="🟢 Новых закупок нет.")
@@ -435,18 +404,6 @@ async def send_updates_job(context):
 # commands block  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
-async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [
-        [InlineKeyboardButton("Показать все улсуги", callback_data='show_csv')],
-        [InlineKeyboardButton("Показать ИТ улсуги", callback_data='show_f_csv')],
-        [InlineKeyboardButton("Получить CSV файл", callback_data='get_csv')],
-        [InlineKeyboardButton("Мой список", callback_data='show_saved')],
-        [InlineKeyboardButton("Подписаться на обновления", callback_data='schedule')]
-    ]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-
-    await update.message.reply_text("Выберите действие:", reply_markup=reply_markup)
-
 async def list_of_commands(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("/start - Начать работу\n/getcsv - Получить файл\n/show - Список всех услуг\n/showfiltered - Список ИТ услуг\n/schedule - Подписаться на обновления\n/mylist - Показать список сохраненных услуг\n/list - Список команд")
 
@@ -455,8 +412,7 @@ async def show_saved(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_user_purchase(update, context, user_id, index=0, is_edit=False)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    await update.message.reply_text("Чтобы получить список команд /list!")
-    await menu(update, context)
+    await update.message.reply_text("Добро пожаловать в бота по закупкам!\nПолучить список команд -> /list!")
 
 async def get_csv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -479,7 +435,9 @@ async def show_csv(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await send_csv_row(update, context, index=0, is_edit=False)
 
 async def send_csv_row(update, context, index: int, is_edit: bool):
-    row, total = getu_csv_row(index) # --- df undefined
+    df = load_csv_rows()
+    
+    row, total = getu_csv_row(index, df)
 
     if row is None:
         message = "❌ Запись не найдена."
@@ -489,20 +447,7 @@ async def send_csv_row(update, context, index: int, is_edit: bool):
             await update.message.reply_text(message)
         return
 
-    title = row.get("Наименование закупки", "❓")
-    price = row.get("Начальная (максимальная) цена контракта", "❓")
-    customer = row.get("Наименование Заказчика", "❓")
-    date = row.get("Дата размещения", "❓")
-    deadline = row.get("Дата окончания подачи заявок", "❓")
-    if deadline == "nan":
-        deadline = "Неограничено"
-
-    message = (
-        f"📌 *{title}*\n"
-        f"💰 {price} ₽\n"
-        f"🏢 {customer}\n"
-        f"📅 {date} → ⏳ {deadline}\n\n"
-    )
+    message = get_text(row)
 
     buttons = []
 
@@ -539,17 +484,26 @@ async def show_filtered_csv(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - #
 
 async def silent_update_csv(context: ContextTypes.DEFAULT_TYPE):
+    global filtered_df
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(CSV_URL, headers=headers)
         with open("zakupki_export.csv", "wb") as f:
             f.write(response.content)
-        df = load_csv_rows()
-        print("CSV-файл обновлён, DataFrame загружен")
+        print("CSV-файл обновлён")
     except Exception as e:
         print(f"Ошибка фонового обновления CSV: {e}")
 
-app = ApplicationBuilder().token(TOKEN).build()
+async def on_startup(app):
+    await app.bot.set_my_commands([
+        BotCommand("start", "Начать работу"),
+        BotCommand("show", "Показать все услуги"),
+        BotCommand("showfiltered", "Показать ИТ услуги"),
+        BotCommand("schedule", "Подписаться на обновления"),
+        BotCommand("list", "Список команд")
+    ])
+
+app = ApplicationBuilder().token(TOKEN).post_init(on_startup).build()
 app.add_handler(CommandHandler("getcsv", get_csv))
 app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("show", show_csv))
@@ -558,12 +512,9 @@ app.add_handler(CallbackQueryHandler(handle_csv_callback, pattern="^(csv_|fcsv_|
 app.add_handler(CommandHandler("save", save_first_csv))
 app.add_handler(CommandHandler("mylist", show_saved))
 app.add_handler(CallbackQueryHandler(handle_mylist_callback, pattern="^(plist_|del_)"))
-app.add_handler(CallbackQueryHandler(handle_menu_callback, pattern="^(show_csv|show_f_csv|get_csv|show_saved|schedule)$"))
 app.add_handler(CommandHandler("list", list_of_commands))
-app.add_handler(CommandHandler("menu", menu))
 app.add_handler(CommandHandler("schedule", schedule))
-# app.add_handler(CommandHandler("showupnew", showupnew))
 app.add_handler(CallbackQueryHandler(handle_scheduled_callback, pattern="^(sched_|ssave_)"))
-app.job_queue.run_repeating(silent_update_csv, interval=100, first=5)
+app.job_queue.run_repeating(silent_update_csv, interval=1800, first=5)
 
 app.run_polling()
